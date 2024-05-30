@@ -1,15 +1,11 @@
+# %%
 import gensim.downloader as gendl
 corpus = gendl.load("text8")
 corpus = list(corpus)
 
+# %%
 training_ratio = 0.9
-total_size = 50
-corpus = corpus[:total_size]
-corpus = [word for sentence in corpus for word in sentence]
-training_size = int(total_size * training_ratio)
-
-training_ratio = 0.9
-total_size = 50
+total_size = 300
 corpus = corpus[:total_size]
 corpus = [word for sentence in corpus for word in sentence]
 training_size = int(total_size * training_ratio)
@@ -19,7 +15,7 @@ def chunk_text(text, chunk_size):
 
 
 # チャンクサイズを設定（例：100単語）
-chunk_size = 100
+chunk_size = 15
 # テキストをチャンクに分割
 chunks = chunk_text(corpus, chunk_size)
 # トレーニングデータを作成
@@ -28,12 +24,16 @@ for chunk in chunks:
     # 2文字単位のプレフィックスを作成
     prefixes = [word[:2] if len(word) >= 2 else word + " " for word in chunk]
     train_data.append((prefixes, chunk))
+
 prefixes = [prefix for prefix, _ in train_data]
 sentences = [sentence for _, sentence in train_data]
 test_prefixes = prefixes[int(len(prefixes) * training_ratio):]
 test_sentences = sentences[int(len(sentences) * training_ratio):]
 prefixes = prefixes[:int(len(prefixes) * training_ratio)]
 sentences = sentences[:int(len(sentences) * training_ratio)]
+
+
+# %%
 
 import tensorflow as tf
 from tensorflow.keras.preprocessing.text import Tokenizer
@@ -47,7 +47,7 @@ word_tokenizer.fit_on_texts(sentences)
 word_vocab_size = len(word_tokenizer.word_index) + 1
 print(word_vocab_size)
 
-
+#%%
 import numpy as np
 prefix_sequences = prefix_tokenizer.texts_to_sequences(prefixes)
 # パディング
@@ -62,6 +62,7 @@ sentence_sequences = pad_sequences(sentence_sequences, maxlen=max_sentence_len, 
 X = np.array(prefix_sequences)
 y = np.array(sentence_sequences)
 
+# %%
 
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Embedding, LSTM, Dense, TimeDistributed
@@ -75,7 +76,7 @@ model.add(TimeDistributed(Dense(word_vocab_size, activation='softmax')))
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 model.summary()
 
-
+# %%
 from tensorflow.keras.callbacks import TensorBoard
 import datetime
 # ログディレクトリの設定
@@ -100,9 +101,12 @@ train_gen = batch_generator(X, y, batch_size, word_vocab_size)
 
 # モデルのトレーニング
 steps_per_epoch = len(X) // batch_size
-
+# %%
+len(X)
+#%%
 model.fit(train_gen, steps_per_epoch=steps_per_epoch, epochs=50, verbose=1, callbacks=[tensorboard_callback])
 
+# %%
 def predict_next_words(model, prefix_tokenizer, word_tokenizer, text, max_prefix_len):
     token_list = prefix_tokenizer.texts_to_sequences([text])[0]
     original_length = len(token_list)
@@ -118,6 +122,7 @@ test_prefix = "th fi tw ch in"
 predicted_sentence = predict_next_words(model, prefix_tokenizer, word_tokenizer, test_prefix, max_prefix_len)
 print(f"Prefix: '{test_prefix}' -> Predicted sentence: '{predicted_sentence}'")
 
+# %%
 def calculate_accuracy(model, test_data, test_labels, prefix_tokenizer, word_tokenizer, max_prefix_len, max_sentence_len):
     # 正答数のカウント
     correct_predictions = 0
