@@ -7,7 +7,9 @@ corpus = list(corpus)
 # データサイズを制限
 
 training_ratio = 0.9
-total_size = 1500
+total_size = 100
+
+
 
 corpus = corpus[:total_size]
 training_size = int(total_size * training_ratio)
@@ -20,9 +22,41 @@ for sentence in corpus:
         if len(word) >= 2:
             temp.append(word[:2])
         else:
-            temp.append(word + " ")
+            # if the word is less than 2 characters, convert it to Upper case
+            temp.append(word.upper())
     flat_corpus.append(temp)
+# %% 
+# ex/experiment is/is a /a go/goodというように、2文字のプレフィックスと本来の単語をスラッシュで区切ったものをファイルに保存する。
+with open("text8.txt", "w") as f:
+    for sentence, real_sentence in zip(flat_corpus[:training_size], corpus[:training_size]):
+        for word, real_word in zip(sentence, real_sentence):
+            f.write(word + "/" + real_word + " ")
+        f.write("\n")
 
+with open("text8val.txt", "w") as f:
+    for sentence, real_sentence in zip(flat_corpus[training_size:], corpus[training_size:]):
+        for word, real_word in zip(sentence, real_sentence):
+            f.write(word + "/" + real_word + " ")
+        f.write("\n")
+
+with open("text8test.txt", "w") as f:
+    for sentence, real_sentence in zip(flat_corpus[training_size:], corpus[training_size:]):
+        for word, real_word in zip(sentence, real_sentence):
+            f.write(word)
+        f.write("\n")
+
+with open("text8test_with_space.txt", "w") as f:
+    for sentence, real_sentence in zip(flat_corpus[training_size:], corpus[training_size:]):
+        for word, real_word in zip(sentence, real_sentence):
+            if len(word) == 1:
+                f.write(word + " ")
+                continue
+            f.write(word)
+        f.write("\n")
+
+# %%
+exit()
+# %%
 training_data = flat_corpus[:training_size]
 training_answer = corpus[:training_size]
 test_data = flat_corpus[training_size:]

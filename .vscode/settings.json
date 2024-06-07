@@ -1,0 +1,7 @@
+{
+    "cloudlatex.enabled": true,
+    "cloudlatex.projectId": 868956,
+    "cloudlatex.supressIcon": true,
+    "cloudlatex.outDir": "/output",
+    "editor.defaultFormatter": null
+}
