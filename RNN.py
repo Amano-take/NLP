@@ -21,6 +21,7 @@ for chunk in chunks:
     # 2文字単位のプレフィックスを作成
     prefixes = [word[:2] if len(word) >= 2 else word + " " for word in chunk]
     train_data.append((prefixes, chunk))
+
 prefixes = [prefix for prefix, _ in train_data]
 sentences = [sentence for _, sentence in train_data]
 test_prefixes = prefixes[int(len(prefixes) * training_ratio):]
